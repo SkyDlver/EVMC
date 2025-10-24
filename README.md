@@ -25,3 +25,11 @@ Notifications: email + Slack + in-app
 Reports: upcoming vacations, accruals, balance snapshots, usage by team
 
 Audit log and role-based access control (Employee, Manager, HR, Admin)
+{
+  "email": "john.doe@example4.com",
+  "password": "123!"
+}
+{
+    "message": "Login successful",
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6ImJhZjgzMmNhLTM5OGUtNGRkNC1hZjFiLTZlZTgzMWExNDY5ZCIsInJvbGUiOiJFTVBMT1lFRSIsInRlYW0iOiJEZXZlbG9wbWVudCIsInN1YiI6ImpvaG4uZG9lQGV4YW1wbGU0LmNvbSIsImlhdCI6MTc2MTI5MjM0NywiZXhwIjoxNzYxMzc4NzQ3fQ.isO_EQ2OFbDXI7h8umwpjAdo8r8bLojZKjBvLz8M0Gw"
+}
