@@ -18,9 +18,6 @@ public class AppConfig {
 
     private final EmployeeRepository employeeRepository;
 
-    /**
-     * Defines how to load user details (from your Employee entity)
-     */
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> employeeRepository.findByEmail(username)
@@ -28,31 +25,20 @@ public class AppConfig {
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + username));
     }
 
-    /**
-     * Password encoder bean — uses BCrypt (recommended)
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configures how authentication works —
-     * uses your custom UserDetailsService + PasswordEncoder
-     */
     @Bean
-    public AuthenticationProvider authenticationProvider(
-            UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
-
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
+    public AuthenticationProvider authenticationProvider(UserDetailsService uds,
+                                                         PasswordEncoder encoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(uds);
+        provider.setPasswordEncoder(encoder);
         return provider;
     }
 
-    /**
-     * Expose AuthenticationManager to be used in AuthService or filters
-     */
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

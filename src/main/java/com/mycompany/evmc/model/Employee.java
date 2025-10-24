@@ -45,5 +45,6 @@ public class Employee {
 
     private LocalDate hiredAt;
 
+    @Builder.Default
     private String timezone = "UTC";
 }

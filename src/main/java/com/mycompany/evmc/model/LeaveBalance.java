@@ -27,6 +27,7 @@ public class LeaveBalance {
     @JoinColumn(name = "type_id", nullable = false)
     private VacationType type;
 
+    @Builder.Default
     @Column(nullable = false)
     private double balance = 0.0;
 

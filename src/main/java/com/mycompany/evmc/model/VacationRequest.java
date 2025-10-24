@@ -40,6 +40,7 @@ public class VacationRequest {
 
     private String reason;
 
+    @Builder.Default
     @Column(nullable = false)
     private String status = "pending"; // pending | approved | rejected | cancelled
 
