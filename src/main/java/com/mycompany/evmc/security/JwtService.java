@@ -3,19 +3,18 @@ package com.mycompany.evmc.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Service
 public class JwtService {
-    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+
     @Value("${jwt.secret}")
     private String secret;
 
@@ -28,45 +27,42 @@ public class JwtService {
     }
 
     public String generateToken(String userEmail) {
-        Date issuedAt = new Date();
-        Date expirationDate = new Date(issuedAt.getTime() + (1000 * 60 * 60 *  24));
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + (1000 * 60 * 60 * 24));  // e.g. 24h
+
         return Jwts.builder()
-                .subject(userEmail)
-                .issuedAt(issuedAt)
-                .expiration(expirationDate)
-                .signWith(getSignKey())
+                .setSubject(userEmail)                     // use setSubject, not subject()
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(getSignKey())                     // OK: use signWith(Key)
                 .compact();
     }
 
+    private Claims extractAllClaims(String token) {
+        JwtParser parser = Jwts.parserBuilder()
+                .setSigningKey(getSignKey())
+                .build();
 
-    private Claims extractAllClaims(String token){
-        return Jwts.parser()
-                .verifyWith(getSignKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return parser
+                .parseClaimsJws(token)
+                .getBody();
     }
-
 
     public boolean validateToken(String token) {
         try {
             Claims claims = extractAllClaims(token);
             return claims.getExpiration().after(new Date()) && claims.getSubject() != null;
         } catch (ExpiredJwtException e) {
-            log.warn("Token expired: {}", e.getMessage()); // Fix log error
+            // token expired
             return false;
         } catch (Exception e) {
-            log.warn("Invalid token: {}", e.getMessage()); // Fix log error
+            // invalid token
             return false;
         }
     }
 
     public String extractSubject(String token) {
         return extractAllClaims(token).getSubject();
-    }
-
-    public Date extractExpiration(String token) {
-        return extractAllClaims(token).getExpiration();
     }
 
 }

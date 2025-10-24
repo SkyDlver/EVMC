@@ -5,6 +5,7 @@ import com.mycompany.evmc.mapper.EmployeeMapper;
 import com.mycompany.evmc.model.Employee;
 import com.mycompany.evmc.model.Role;
 import com.mycompany.evmc.repository.EmployeeRepository;
+import com.mycompany.evmc.security.JwtService;
 import com.mycompany.evmc.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +21,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeMapper employeeMapper;
+    private final JwtService jwtService;
 
     @Override
     public LoginResponse loginUser(LoginRequest loginRequest) {
@@ -35,21 +36,20 @@ public class AuthServiceImpl implements AuthService {
 
         Employee employee = userOpt.get();
 
-        // ⚠️ Here you’d check password hash — mock for now
-        // TODO: integrate BCrypt or JWT logic
-        if (!"password123".equals(loginRequest.getPassword())) {
+        // ✅ Check password using PasswordEncoder
+        if (!passwordEncoder.matches(loginRequest.getPassword(), employee.getPasswordHash())) {
             return LoginResponse.builder()
                     .message("Invalid password")
                     .token(null)
                     .build();
         }
 
-        // Placeholder token
-        String fakeJwt = "FAKE-JWT-TOKEN-" + UUID.randomUUID();
+        // ✅ Generate JWT token using JwtService
+        String jwtToken = jwtService.generateToken(employee.getEmail());
 
         return LoginResponse.builder()
                 .message("Login successful")
-                .token(fakeJwt)
+                .token(jwtToken)
                 .build();
     }
 
@@ -69,7 +69,7 @@ public class AuthServiceImpl implements AuthService {
                 .passwordHash(hashedPassword)
                 .role(request.getRole() != null ? request.getRole() : Role.EMPLOYEE)
                 .team(request.getTeam())
-                .hiredAt(request.getHiredAt())
+                .hiredAt(request.getHiredAt() != null ? request.getHiredAt() : LocalDate.now())
                 .build();
 
         Employee saved = employeeRepository.save(employee);
