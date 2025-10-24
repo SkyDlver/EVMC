@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -45,7 +46,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // ✅ Generate JWT token using JwtService
-        String jwtToken = jwtService.generateToken(employee.getEmail());
+        String jwtToken = jwtService.generateToken(Map.of(
+                "id", employee.getId().toString(),
+                "role", employee.getRole().name(),
+                "team", employee.getTeam()
+        ), employee.getEmail());
+
 
         return LoginResponse.builder()
                 .message("Login successful")
