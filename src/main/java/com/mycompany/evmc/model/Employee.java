@@ -30,14 +30,18 @@ public class Employee {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Column(nullable = false)
+    private String passwordHash;
+
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Employee manager;
 
     private String team;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role; // employee | manager | hr | admin
+    private Role role;
 
     private LocalDate hiredAt;
 

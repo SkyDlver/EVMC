@@ -1,20 +1,15 @@
 package com.mycompany.evmc.controller;
 
-
-import com.mycompany.evmc.dto.LoginDto;
-import com.mycompany.evmc.dto.RegisterDto;
-import com.mycompany.evmc.dto.UserProfileDto;
+import com.mycompany.evmc.dto.LoginRequest;
+import com.mycompany.evmc.dto.LoginResponse;
+import com.mycompany.evmc.dto.RegisterRequest;
+import com.mycompany.evmc.dto.RegisterResponse;
 import com.mycompany.evmc.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,25 +21,25 @@ public class AuthController {
     /**
      * Endpoint to register a new user.
      *
-     * @param registerDto The registration details provided by the client.
+     * @param registerRequest The registration details provided by the client.
      * @return ResponseEntity containing the created user details.
      */
     @PostMapping("/register")
-    public ResponseEntity<UserProfileDto> register(@Valid @RequestBody RegisterDto registerDto) {
-        return ResponseEntity.ok(authService.registerUser(registerDto));
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        return ResponseEntity.ok(authService.registerUser(registerRequest));
     }
 
     /**
      * Endpoint to log in a user and return a JWT token.
      *
-     * @param loginDto The login credentials provided by the client.
+     * @param loginRequest The login credentials provided by the client.
      * @return ResponseEntity containing the JWT token.
      */
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginDto loginDto) {
-        String token = authService.loginUser(loginDto);
-
-        // Return JWT token in response body
-        return ResponseEntity.ok(Map.of("message", "Login successful", "token", token));
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        LoginResponse response = authService.loginUser(loginRequest);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + response.getToken())
+                .body(response);
     }
 }
